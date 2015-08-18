@@ -9644,7 +9644,7 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 		if (flag&1)
 			sc_start2(src,bl,type,skill_area_temp[5],skill_lv,src->id,skill_area_temp[6]);
 		else {
-			// Success chance: (Skill Level x 6) + (Voice Lesson Skill Level x 2) + (Caster’s Job Level / 2) %
+			// Success chance: (Skill Level x 6) + (Voice Lesson Skill Level x 2) + (Casterï¿½s Job Level / 2) %
 			skill_area_temp[5] = skill_lv * 6 + ((sd) ? pc_checkskill(sd, WM_LESSON) : 1) * 2 + (sd ? sd->status.job_level : 50) / 2;
 			skill_area_temp[6] = skill_get_time(skill_id,skill_lv);
 			map_foreachinrange(skill_area_sub, src, skill_get_splash(skill_id,skill_lv), BL_CHAR|BL_SKILL, src, skill_id, skill_lv, tick, flag|BCT_ALL|BCT_WOS|1, skill_castend_nodamage_id);
@@ -10119,10 +10119,9 @@ int skill_castend_nodamage_id (struct block_list *src, struct block_list *bl, ui
 	case KO_KAZEHU_SEIRAN:
 	case KO_DOHU_KOUKAI:
 		if (sd) {
-			int type = skill_get_ele(skill_id,skill_lv);
-
+			int type2 = skill_get_ele(skill_id,skill_lv);
 			clif_skill_nodamage(src,bl,skill_id,skill_lv,1);
-			pc_addspiritcharm(sd,skill_get_time(skill_id,skill_lv),MAX_SPIRITCHARM,type);
+			pc_addspiritcharm(sd,skill_get_time(skill_id,skill_lv),MAX_SPIRITCHARM,type2);
 		}
 		break;
 	case KO_ZANZOU:
@@ -15487,7 +15486,7 @@ struct skill_condition skill_get_requirement(struct map_session_data* sd, uint16
 					req.itemid[i] = skill_db[idx]->require.itemid[i];
 					req.amount[i] = skill_db[idx]->require.amount[i];
 
-					if (skill_id >= HT_SKIDTRAP && skill_id <= HT_TALKIEBOX && pc_checkskill(sd, RA_RESEARCHTRAP) > 0 || skill_id == SC_ESCAPE) {
+					if ((skill_id >= HT_SKIDTRAP && skill_id <= HT_TALKIEBOX) && (pc_checkskill(sd, RA_RESEARCHTRAP) > 0 || skill_id == SC_ESCAPE)) {
 						int16 itIndex;
 
 						if ((itIndex = pc_search_inventory(sd,req.itemid[i])) < 0 || ( itIndex >= 0 && sd->status.inventory[itIndex].amount < req.amount[i])) {
