@@ -77,8 +77,8 @@ enum MOBID {
 	MOBID_A_GUARDIAN_,
 	MOBID_BARRICADE1		= 1905,
 	MOBID_BARRICADE2,
-	MOBID_GUARIDAN_STONE1,
-	MOBID_GUARIDAN_STONE2,
+	MOBID_GUARDIAN_STONE1,
+	MOBID_GUARDIAN_STONE2,
 	MOBID_FOOD_STOR,
 	MOBID_BLUE_CRYST		= 1914,
 	MOBID_PINK_CRYST,
@@ -370,6 +370,18 @@ enum e_element {
 
 #define MAX_ELE_LEVEL 4 /// Maximum Element level
 
+/**
+ * Types of spirit charms
+ * NOTE: Code assumes that this matches the first entries in enum elements
+ */
+enum spirit_charm_types {
+	CHARM_TYPE_NONE = 0,
+	CHARM_TYPE_WATER,
+	CHARM_TYPE_LAND,
+	CHARM_TYPE_FIRE,
+	CHARM_TYPE_WIND
+};
+
 enum mob_ai {
 	AI_NONE = 0,
 	AI_ATTACK,
@@ -425,6 +437,7 @@ struct flooritem_data {
 	int first_get_charid,second_get_charid,third_get_charid;
 	unsigned int first_get_tick,second_get_tick,third_get_tick;
 	struct item item;
+	unsigned short mob_id; ///< ID of monster who dropped it. 0 for non-monster who dropped it.
 };
 
 enum _sp {
@@ -447,6 +460,9 @@ enum _sp {
 	SP_CHARRENAME=125,
 	SP_CHARFONT=126,
 	SP_BANK_VAULT = 127,
+	SP_ROULETTE_BRONZE = 128,
+	SP_ROULETTE_SILVER = 129,
+	SP_ROULETTE_GOLD = 130,
 
 	// Mercenaries
 	SP_MERCFLEE=165, SP_MERCKILLS=189, SP_MERCFAITH=190,
@@ -491,7 +507,7 @@ enum _sp {
 	SP_UNSTRIPABLE_WEAPON,SP_UNSTRIPABLE_ARMOR,SP_UNSTRIPABLE_HELM,SP_UNSTRIPABLE_SHIELD,  // 2034-2037
 	SP_INTRAVISION, SP_ADD_MONSTER_DROP_ITEMGROUP, SP_SP_LOSS_RATE, // 2038-2040
 	SP_ADD_SKILL_BLOW, SP_SP_VANISH_RATE, SP_MAGIC_SP_GAIN_VALUE, SP_MAGIC_HP_GAIN_VALUE, SP_ADD_MONSTER_ID_DROP_ITEM, //2041-2045
-	SP_EMATK, SP_SP_GAIN_RACE_ATTACK, SP_HP_GAIN_RACE_ATTACK, SP_SKILL_USE_SP_RATE, //2046-2049
+	SP_EMATK, SP_COMA_CLASS, SP_COMA_RACE, SP_SKILL_USE_SP_RATE, //2046-2049
 	SP_SKILL_COOLDOWN,SP_SKILL_FIXEDCAST, SP_SKILL_VARIABLECAST, SP_FIXCASTRATE, SP_VARCASTRATE, //2050-2054
 	SP_SKILL_USE_SP,SP_MAGIC_ATK_ELE, SP_ADD_FIXEDCAST, SP_ADD_VARIABLECAST,  //2055-2058
 	SP_SET_DEF_RACE,SP_SET_MDEF_RACE,SP_HP_VANISH_RATE,  //2059-2061
@@ -499,7 +515,7 @@ enum _sp {
 	SP_IGNORE_DEF_CLASS, SP_DEF_RATIO_ATK_CLASS, SP_ADDCLASS, SP_SUBCLASS, SP_MAGIC_ADDCLASS, //2062-2066
 	SP_WEAPON_COMA_CLASS, SP_IGNORE_MDEF_CLASS_RATE, SP_EXP_ADDCLASS, SP_ADD_CLASS_DROP_ITEM, //2067-2070
 	SP_ADD_CLASS_DROP_ITEMGROUP, SP_ADDMAXWEIGHT, SP_ADD_ITEMGROUP_HEAL_RATE,  // 2071-2073
-	SP_HP_VANISH_RACE_RATE, SP_SP_VANISH_RACE_RATE, // 2074-2075
+	SP_HP_VANISH_RACE_RATE, SP_SP_VANISH_RACE_RATE, SP_ABSORB_DMG_MAXHP, SP_SUB_SKILL, SP_SUBDEF_ELE, // 2074-2078
 };
 
 enum _look {
@@ -818,7 +834,7 @@ bool map_addnpc(int16 m,struct npc_data *);
 int map_clearflooritem_timer(int tid, unsigned int tick, int id, intptr_t data);
 int map_removemobs_timer(int tid, unsigned int tick, int id, intptr_t data);
 void map_clearflooritem(struct block_list* bl);
-int map_addflooritem(struct item *item,int amount,int16 m,int16 x,int16 y,int first_charid,int second_charid,int third_charid,int flags);
+int map_addflooritem(struct item *item, int amount, int16 m, int16 x, int16 y, int first_charid, int second_charid, int third_charid, int flags, unsigned short mob_id);
 
 // instances
 int map_addinstancemap(const char*,int);
@@ -994,6 +1010,7 @@ extern char mob_skill_db2_db[32];
 extern char vendings_db[32];
 extern char vending_items_db[32];
 extern char market_table[32];
+extern char db_roulette_table[32];
 
 void do_shutdown(void);
 

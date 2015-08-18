@@ -1287,6 +1287,14 @@ getvariableofnpc will not work on them.
 
 ---------------------------------------
 
+*getvar <variable>,<char_id>;
+
+Get variable value from the specified player. Only player/account variables
+are allowed to be used (temporary character variable "@", permanent
+character "", permanent local account "#", and permanent global account "##").
+
+---------------------------------------
+
 *goto <label>;
 
 This command will make the script jump to a label, usually used in conjunction 
@@ -2481,6 +2489,19 @@ Deletes the spirit ball(s) from player.
 Counts the spirit ball that player has.
 
 ---------------------------------------
+
+*ignoretimeout <flag>{,<char_id>};
+
+Disables the SECURE_NPCTIMEOUT function on the character invoking the script,
+or by the given character ID/character name.
+
+Valid flag:
+ 0 - Enabled SECURE_NPCTIMEOUT.
+ 1 - Disable SECURE_NPCTIMEOUT.
+
+Note: SECURE_NPCTIMEOUT must be enabled for this to work.
+
+---------------------------------------
 \\
 2,2 Item-related commands
 \\
@@ -2492,7 +2513,7 @@ This function returns the item ID of the item equipped in the equipment slot
 specified on the invoking character. If nothing is equipped there, it returns -1. 
 Valid equipment slots are:
 
-EQI_HEAD_TOP (1)          - Upper Headear
+EQI_HEAD_TOP (1)          - Upper Headgear
 EQI_ARMOR (2)             - Armor (jackets, robes)
 EQI_HAND_L (3)            - Left hand (weapons, shields)
 EQI_HAND_R (4)            - Right hand (weapons)
@@ -2852,14 +2873,26 @@ It's useful for when you want to check whether an item contains cards or if it's
 
 ---------------------------------------
 
-*mergeitem({<item_id>{,<char_id>}});
-*mergeitem({"<item name>"{,<char_id>}});
+*mergeitem({,<char_id>});
+
+Open merge item window to merge available item can be merged.
+
+Examples
+1. See the NPC 'npc/re/other/merge_item.txt'.
+2. Simple usage:
+    mes "Let's check if any item can be merged.";
+    close2;
+    mergeitem;
+    end;
+
+---------------------------------------
+
+*mergeitem2({<item_id>{,<char_id>}});
+*mergeitem2({"<item name>"{,<char_id>}});
 
 Merge all stackable items that separated by GUID flags
 (either by flag 4 item_flag.txt or GUID  in item_group).
 If no item ID/name given, all possible items in player's inventory will be merged.
-
-Example, just see the NPC 'npc/re/other/merge_item.txt'.
 
 ---------------------------------------
 //
@@ -3374,7 +3407,8 @@ account ID.
 
 *getattachedrid();
 
-Returns RID from running script. Script may does not have RID.
+Returns RID from running script. Script may not be attached to any RID like
+a floating script or function and will return 0.
 
 ---------------------------------------
 
@@ -3806,6 +3840,13 @@ by default green
 
 ---------------------------------------
 
+*showscript "<message>"{,<GID>};
+
+Makes attached player or GID says a message like shouting a skill name, the message
+will be seen to everyone around but not in chat window.
+
+---------------------------------------
+
 *warp "<map name>",<x>,<y>;
 
 This command will take the invoking character to the specified map, and if 
@@ -4150,6 +4191,20 @@ be the opposite sex.
 
 If there are any Dancer/Gypsy or Bard/Clown characters on the account, 
 they will also have their skills reset upon 'changesex'.
+
+---------------------------------------
+
+*changecharsex({<char_id>});
+
+This command will change the gender of the attached character. If it 
+was male, it will become female, if it was female, it will become male. The 
+change will be written to the character server, the player will receive the 
+message: "Need disconnection to perform change-sex request..." and the player 
+will be immediately kicked to the login screen. When they log back in, they will 
+be the opposite sex.
+
+If the character being changed is a Dancer/Gypsy or Bard/Clown class type, 
+the character will also have their skills reset upon 'changecharsex'.
 
 ---------------------------------------
 
@@ -5297,7 +5352,7 @@ expected, refer only to an invoking character.
 What these commands do is 'attach' a script to the player which will get
 executed on attack (or when attacked in the case of autobonus2).
 
-Rate is the trigger rate of the script (10000 = 100%). 
+Rate is the trigger rate of the script (1000 = 100%). 
 
 Duration is the time that the bonus will last for since the script has triggered.
 
@@ -5521,9 +5576,10 @@ Examples:
 ---------------------------------------
 
 *pcblockmove <id>,<option>;
+*unitblockmove <id>,<option>;
 
 Prevents the given GID from moving when the option is 1, and enables the ID to
-move again when the option is 0. This command will run for the attached player
+move again when the option is 0. This command will run for the attached unit
 if the given GID is zero.
 
 Examples:
@@ -6417,6 +6473,20 @@ example.
 
 ---------------------------------------
 
+*waitingroomkick "<NPC object name>" , "<character name>";
+
+This command kicks the given character from the waiting room attached to the given NPC.
+
+---------------------------------------
+
+*getwaitingroomusers "<NPC object name>";
+
+This command get all the characters in the waiting room of the given NPC and stores
+their gids in the array .@waitingroom_users[]. Also, stores the the number of characters
+in the variable .@waitingroom_usercount
+
+---------------------------------------
+
 *kickwaitingroomall {"<NPC object name>"};
 
 This command kicks everybody out of a specified waiting room chat.
@@ -6958,8 +7028,8 @@ in this way.
 \\
 ---------------------------------------
 
-*unitwalk <GID>,<x>,<y>;
-*unitwalk <GID>,<Target ID>;
+*unitwalk <GID>,<x>,<y>{,"<event label>"};
+*unitwalkto <GID>,<Target GID>{,"<event label>"};
 
 This command will tell a <GID> to walk to a position, defined either as a set of
 coordinates or another object. The command returns a 1 for success and 0 upon failure.
@@ -6968,10 +7038,13 @@ If coordinates are passed, the <GID> will walk to the given x,y coordinates on t
 unit's current map. While there is no way to move across an entire map with 1 command
 use, this could be used in a loop to move long distances.
 
-If an object ID is passed, the initial <GID> will walk to the <Target ID> (similar to
+If an object ID is passed, the initial <GID> will walk to the <Target GID> (similar to
 walking to attack). This is based on the distance from <GID> to <Target ID>. This command
 uses a hard walk check, so it will calculate a walk path with obstacles. Sending a bad
 target ID will result in an error.
+
+An optional Event Label can be passed as well which will execute when the <GID> has reached
+the given coordinates or <Target GID>.
 
 Examples:
 
@@ -6985,7 +7058,7 @@ Examples:
 		dispbottom "That's too far away, man.";
 
 // Makes player walk to another character named "WalkToMe".
-	unitwalk getcharid(3),getcharid(3,"WalkToMe");
+	unitwalkto getcharid(3),getcharid(3,"WalkToMe");
 
 ---------------------------------------
 
@@ -7028,6 +7101,10 @@ This command will make a <GID> stop attacking.
 
 This command will make a <GID> stop moving.
 
+Note: If this is called from OnTouch, then the walktimer attached to the unit is
+removed from OnTouch which causes this command to not stop the unit from walking.
+Suggest to use 'unitblockmove' to forcefully stop the unit with OnTouch.
+
 ---------------------------------------
 
 *unittalk <GID>,"<text>";
@@ -7055,6 +7132,20 @@ Skill ID is the ID of the skill, skill level is the level of the skill.
 Cast time is the amount of seconds to add or remove from the skill. Use a positive value to
 add and negative value to subtract. Using 0 or no value will use the default skill cast time.
 For the position, the x and y are given in the UnitSkillUsePos.
+
+---------------------------------------
+
+*getunittype <GID>;
+
+Returns the type of object from the given Game ID. Returns -1 if the given <GID> does not
+exist.
+
+ 0 - Monster
+ 1 - Homunculus
+ 2 - Pet
+ 3 - Mercenary
+ 4 - Elemental
+ 5 - NPC
 
 ---------------------------------------
 

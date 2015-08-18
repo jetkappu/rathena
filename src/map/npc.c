@@ -263,9 +263,11 @@ int npc_rr_secure_timeout_timer(int tid, unsigned int tick, int id, intptr_t dat
 	struct map_session_data* sd = NULL;
 	unsigned int timeout = NPC_SECURE_TIMEOUT_NEXT;
 	int cur_tick = gettick(); //ensure we are on last tick
-	if( (sd = map_id2sd(id)) == NULL || !sd->npc_id ) {
-		if( sd ) sd->npc_idle_timer = INVALID_TIMER;
-		return 0;//Not logged in anymore OR no longer attached to a npc
+
+	if ((sd = map_id2sd(id)) == NULL || !sd->npc_id || sd->state.ignoretimeout) {
+		if (sd)
+			sd->npc_idle_timer = INVALID_TIMER;
+		return 0; // Not logged in anymore OR no longer attached to a NPC OR using 'ignoretimeout' script command
 	}
 
 	switch( sd->npc_idle_type ) {
@@ -385,33 +387,37 @@ static int npc_event_do_sub(DBKey key, DBData *data, va_list ap)
 {
 	const char* p = key.str;
 	struct event_data* ev;
-	int* c;
+	int* c, rid;
 	const char* name;
 
 	nullpo_ret(ev = db_data2ptr(data));
 	nullpo_ret(c = va_arg(ap, int *));
 	nullpo_ret(name = va_arg(ap, const char *));
+	rid = va_arg(ap, int);
 
 	if( p && strcmpi(name, p) == 0 )
 	{
-		run_script(ev->nd->u.scr.script,ev->pos,0,ev->nd->bl.id);
+		run_script(ev->nd->u.scr.script,ev->pos,rid,ev->nd->bl.id);
 		(*c)++;
 	}
 
 	return 0;
 }
 
-// runs the specified event (supports both single-npc and global events)
-int npc_event_do(const char* name)
-{
+int npc_event_do_id(const char* name, int rid) {
 	int c = 0;
 
 	if( name[0] == ':' && name[1] == ':' )
-		ev_db->foreach(ev_db,npc_event_doall_sub,&c,name,0);
+		ev_db->foreach(ev_db,npc_event_doall_sub,&c,name,0,rid);
 	else
-		ev_db->foreach(ev_db,npc_event_do_sub,&c,name);
+		ev_db->foreach(ev_db,npc_event_do_sub,&c,name,rid);
 
 	return c;
+}
+
+// runs the specified event (supports both single-npc and global events)
+int npc_event_do(const char* name) {
+	return npc_event_do_id(name, 0);
 }
 
 // runs the specified event (global only)
@@ -1249,7 +1255,7 @@ int npc_click(struct map_session_data* sd, struct npc_data* nd)
 				}
 
 				if (i == nd->u.shop.count) {
-					clif_colormes(sd, color_table[COLOR_RED], msg_txt(sd, 534));
+					clif_colormes(sd->fd, color_table[COLOR_RED], msg_txt(sd, 534));
 					return false;
 				}
 
@@ -1424,20 +1430,23 @@ int npc_cashshop_buylist(struct map_session_data *sd, int points, int count, uns
 	pc_paycash(sd,vt,points, LOG_TYPE_NPC);
 
 	// Delivery Process ----------------------------------------------------
-	for( i = 0; i < count; i++ )
-	{
-		struct item item_tmp;
-
+	for( i = 0; i < count; i++ ) {
 		nameid = item_list[i*2+1];
 		amount = item_list[i*2+0];
 
-		memset(&item_tmp,0,sizeof(item_tmp));
+		if( !pet_create_egg(sd,nameid) ) {
+			struct item item_tmp;
+			unsigned short get_amt = amount;
 
-		if( !pet_create_egg(sd,nameid) )
-		{
+			memset(&item_tmp, 0, sizeof(item_tmp));
 			item_tmp.nameid = nameid;
 			item_tmp.identify = 1;
-			pc_additem(sd,&item_tmp,amount,LOG_TYPE_NPC);
+
+			if ((itemdb_search(nameid))->flag.guid)
+				get_amt = 1;
+
+			for (j = 0; j < amount; j += get_amt)
+				pc_additem(sd,&item_tmp,get_amt,LOG_TYPE_NPC);
 		}
 	}
 
@@ -1544,14 +1553,19 @@ int npc_cashshop_buy(struct map_session_data *sd, unsigned short nameid, int amo
 
 	pc_paycash(sd, price, points, LOG_TYPE_NPC);
 
-	if( !pet_create_egg(sd, nameid) )
-	{
+	if( !pet_create_egg(sd, nameid) ) {
 		struct item item_tmp;
-		memset(&item_tmp, 0, sizeof(struct item));
+		unsigned short get_amt = amount, j;
+
+		memset(&item_tmp, 0, sizeof(item_tmp));
 		item_tmp.nameid = nameid;
 		item_tmp.identify = 1;
 
-		pc_additem(sd,&item_tmp, amount, LOG_TYPE_NPC);
+		if (item->flag.guid)
+			get_amt = 1;
+
+		for (j = 0; j < amount; j += get_amt)
+			pc_additem(sd,&item_tmp, get_amt, LOG_TYPE_NPC);
 	}
 
 	return 0;
@@ -1666,7 +1680,7 @@ uint8 npc_buylist(struct map_session_data* sd, uint16 n, struct s_npc_buy_list *
 				struct item_data *id = itemdb_exists(nd->u.shop.itemshop_nameid);
 
 				sprintf(output,msg_txt(sd,712),id->jname,id->nameid); // You do not have enough %s %d.
-				clif_colormes(sd,color_table[COLOR_RED],output);
+				clif_colormes(sd->fd,color_table[COLOR_RED],output);
 				return 1;
 			}
 			break;
@@ -1674,7 +1688,7 @@ uint8 npc_buylist(struct map_session_data* sd, uint16 n, struct s_npc_buy_list *
 			count = pc_readreg2(sd, nd->u.shop.pointshop_str);
 			if (z > (double)count) {
 				sprintf(output,msg_txt(sd,713),nd->u.shop.pointshop_str); // You do not have enough '%s'.
-				clif_colormes(sd,color_table[COLOR_RED],output);
+				clif_colormes(sd->fd,color_table[COLOR_RED],output);
 				return 1;
 			}
 			break;
@@ -1701,7 +1715,6 @@ uint8 npc_buylist(struct map_session_data* sd, uint16 n, struct s_npc_buy_list *
 	for( i = 0; i < n; ++i ) {
 		unsigned short nameid = item_list[i].nameid;
 		unsigned short amount = item_list[i].qty;
-		struct item item_tmp;
 
 #if PACKETVER >= 20131223
 		if (nd->subtype == NPCTYPE_MARKETSHOP) {
@@ -1716,11 +1729,19 @@ uint8 npc_buylist(struct map_session_data* sd, uint16 n, struct s_npc_buy_list *
 		if (itemdb_type(nameid) == IT_PETEGG)
 			pet_create_egg(sd, nameid);
 		else {
-			memset(&item_tmp,0,sizeof(item_tmp));
-			item_tmp.nameid = nameid;
-			item_tmp.identify = 1;
+			unsigned short get_amt = amount;
 
-			pc_additem(sd,&item_tmp,amount,LOG_TYPE_NPC);
+			if ((itemdb_search(nameid))->flag.guid)
+				get_amt = 1;
+
+			for (k = 0; k < amount; k += get_amt) {
+				struct item item_tmp;
+				memset(&item_tmp, 0, sizeof(item_tmp));
+				item_tmp.nameid = nameid;
+				item_tmp.identify = 1;
+
+				pc_additem(sd,&item_tmp,get_amt,LOG_TYPE_NPC);
+			}
 		}
 	}
 
