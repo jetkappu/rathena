@@ -3087,8 +3087,8 @@ int status_calc_pc_(struct map_session_data* sd, enum e_status_calc_opt opt)
 		+ sizeof(sd->autospell2)
 		+ sizeof(sd->autospell3)
 		+ sizeof(sd->addeff)
-		+ sizeof(sd->addeff2)
-		+ sizeof(sd->addeff3)
+		+ sizeof(sd->addeff_atked)
+		+ sizeof(sd->addeff_onskill)
 		+ sizeof(sd->skillatk)
 		+ sizeof(sd->skillusesprate)
 		+ sizeof(sd->skillusesp)
@@ -8497,6 +8497,10 @@ int status_change_start(struct block_list* src, struct block_list* bl,enum sc_ty
 	case SC_EQC:
 		status_change_end(bl,SC_TINDER_BREAKER2,INVALID_TIMER);
 		break;
+	case SC_IMPOSITIO:
+		if (sc && sc->data[SC_IMPOSITIO] && sc->data[SC_IMPOSITIO]->val1 > val1) //Replace higher level effect for lower.
+			status_change_end(bl,SC_IMPOSITIO,INVALID_TIMER);
+		break;
 	}
 
 	// Check for overlapping fails
@@ -12111,7 +12115,7 @@ int status_change_timer(int tid, unsigned int tick, int id, intptr_t data)
 				status_change_end(bl, (sc_type)i, INVALID_TIMER);
 			break;
 		}
-		sc_timer_next(5000 + tick, status_change_timer, bl->id, data);
+		sc_timer_next(10000 + tick, status_change_timer, bl->id, data);
 		return 0;
 
 	case SC_ELECTRICSHOCKER:

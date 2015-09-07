@@ -2653,11 +2653,11 @@ REPLACE INTO `item_db_re` VALUES (4514,'Pom_Spider_Card','Pom Spider Card',6,20,
 REPLACE INTO `item_db_re` VALUES (4515,'Alnoldi_Card','Alnoldi Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,32,NULL,NULL,NULL,NULL,'bonus2 bSubRace,RC_Plant,30;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4516,'Comodo_Card','Comodo Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,16,NULL,NULL,NULL,NULL,'bonus bDef,50; bonus bFlee,-25;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4517,'Cendrawasih_Card','Cendrawasih Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,769,NULL,NULL,NULL,NULL,'bonus bInt,2; if(BaseClass==Job_Mage){ bonus bInt,getrefine()/3; }',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (4518,'Banaspaty_Card','Banaspaty Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'bonus2 bAddEff,Eff_Burning,1500;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (4518,'Banaspaty_Card','Banaspaty Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'bonus3 bAddEff,Eff_Burning,500,ATF_TARGET;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4519,'Butoijo_Card','Butoijo Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'bonus2 bAddRace,RC_Angel,20;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4520,'Leak_Card','Leak Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,4,NULL,NULL,NULL,NULL,'bonus bStr,3; bonus2 bAddEff,Eff_Confusion,5000; bonus3 bAddEff,Eff_Confusion,5000,ATF_SKILL;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4521,'Sedora_Card','Sedora Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'bonus bCritAtkRate,15;',NULL,NULL);
-REPLACE INTO `item_db_re` VALUES (4522,'Sropho_Card','Sropho Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'bonus3 bAddEffWhenHit,Eff_Freeze,50,ATF_SHORT;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (4522,'Sropho_Card','Sropho Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'bonus4 bAddEff,Eff_Crystalize,500,ATF_SHORT,3000;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4523,'Pot_Dofle_Card','Pot Dofle Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,16,NULL,NULL,NULL,NULL,'bonus bDefEle,Ele_Water; bonus2 bSubRace,RC_Fish,10;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4524,'King_Dramoh_Card','King Dramoh Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,769,NULL,NULL,NULL,NULL,'bonus bStr,2; if(BaseClass==Job_Swordman){ bonus bStr,2+(getrefine()/3); }',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4525,'Kraken_Card','Kraken Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,4,NULL,NULL,NULL,NULL,'bonus bFlee,10; skill "TF_HIDING",1; skill "RG_RAID",1; bonus5 bAutoSpellOnSkill,"RG_RAID","NPC_WIDEBLEEDING",1,250,1;',NULL,'sc_end SC_HIDING;');
@@ -2750,6 +2750,9 @@ REPLACE INTO `item_db_re` VALUES (4630,'Nightmare_Timer_Keeper_Card','Nightmare 
 REPLACE INTO `item_db_re` VALUES (4631,'Owl_Viscount_Card','Owl Viscount Card',6,10,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,136,NULL,NULL,NULL,NULL,'bonus bAspdRate,3;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4632,'Owl_Marquees_Card','Owl Marquees Card',6,10,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,136,NULL,NULL,NULL,NULL,'bonus5 bAutoSpell,"SA_VIOLENTGALE",(getskilllv("SA_VIOLENTGALE")==5?5:1),1,BF_SHORT,0;',NULL,NULL);
 REPLACE INTO `item_db_re` VALUES (4633,'Enhanced_Archer_Skeleton_Card','Enhanced Archer Skeleton Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'bonus bLongAtkRate,(BaseLevel>=100?12:10);',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (4634,'Enhanced_Soldier_Skeleton_Card','Enhanced Soldier Skeleton Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,2,NULL,NULL,NULL,NULL,'if (BaseLevel<100) { bonus bCritical,9; } else { bonus bCritical,10; bonus bCritAtkRate,5; }',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (4635,'Enhanced_Amdarais_Card','Enhanced Amdarais Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,16,NULL,NULL,NULL,NULL,'.@r = getrefine(); bonus bDef,(.@r*10); bonus bFlee,(.@r*-2); if (BaseLevel>=100) bonus bMaxHP,500;',NULL,NULL);
+REPLACE INTO `item_db_re` VALUES (4636,'Bijou_Card','Bijou Card',6,20,NULL,10,NULL,NULL,NULL,NULL,NULL,NULL,NULL,32,NULL,NULL,NULL,NULL,'bonus2 bResEff,Eff_Freeze,10000; bonus bAtkRate,10; bonus bMatkRate,10;',NULL,NULL);
 #===================================================================
 # Armor Enchant System
 #===================================================================
